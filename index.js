@@ -10,8 +10,7 @@ app.use(cors())
 
 
 
-
-//sqs (front -> scrapper)
+//sqs (front -> index-> scrapper)
 
 app.get('/activateSearch', (req, res) => {
 
@@ -33,13 +32,13 @@ app.get('/activateSearch', (req, res) => {
 
 })
 
-//sqs (front -> queryer)
+//sqs (front ->index-> queryer)
 
 app.get('/get-data', (req, res) => {
 
-
+    console.log(req.query)
     const params = {
-        MessageBody: req.query.targetWord, // Replace with your message body
+        MessageBody: JSON.stringify(req.query), // Replace with your message body
         QueueUrl: 'https://sqs.us-east-1.amazonaws.com/113262712766/backendAPItoQueryer' // Replace with your queue URL
     };
 

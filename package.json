@@ -4,7 +4,8 @@
   "description": "��#\u0000 \u0000s\u0000p\u0000y\u0000d\u0000e\u0000r\u00002\u0000\r\u0000 \u0000",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:both": "node scrapper.js  &  node wrapper.js"
   },
   "repository": {
     "type": "git",

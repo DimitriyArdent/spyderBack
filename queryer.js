@@ -4,6 +4,8 @@ const app = express()
 const cors = require('cors')
 const redis = require('redis');
 const { firstBatchData } = require('./redisOperationsFunctions/retriveRedis')
+const { advancedRedisSearch } = require('./redisOperationsFunctions/retriveRedis')
+
 
 app.use(cors())
 
@@ -31,58 +33,50 @@ const AWS = require('aws-sdk');
 
 
 
+// !!IMPORTANT!!  firstBatchData() activated by himsaelf, and not via SQS
+firstBatchData() // activated till aquire and send all dats from first search iteration ( url.depth == 0 ).
 
 
 
 
+
+
+
+
+//reciving message from the front / advanced search / url depth >0 
+/*
 setInterval(async () => {
 
 
 
-    firstBatchData() // activated till aquire and send all dats from first search iteration ( url.depth == 0 )
-
-
-
-
-
-
-
-
-
-
-    //reciving message from the front
-
     const params = {
         QueueUrl: 'https://sqs.us-east-1.amazonaws.com/113262712766/backendAPItoQueryer',
         MaxNumberOfMessages: 1, // maximum number of messages to receive at a time
-        WaitTimeSeconds: 20 // maximum time to wait for new messages
+        WaitTimeSeconds: 1 // maximum time to wait for new messages
     };
 
     let response = await sqs.receiveMessage(params).promise();
 
 
-
-    if (response && response.Messages && response.Messages[0].Body) {
-        console.log('a')
-
+    if (response.Messages?.[0]?.Body?.length > 0) {
+        advancedRedisSearch(response.Messages[0].Body) // URL that was hited at the front, chosen from the first batch of url's
 
 
         //deleting message from the front
-
         var deleteParams = {
             QueueUrl: 'https://sqs.us-east-1.amazonaws.com/113262712766/backendAPItoQueryer',
             ReceiptHandle: response.Messages[0].ReceiptHandle
         };
-        var removedMessage = await sqs.deleteMessage(deleteParams).promise();
+        //   var removedMessage = await sqs.deleteMessage(deleteParams).promise();
 
 
 
     }
 
 
-}, 3000);
+}, 2000);
 
-
+*/
 
 
 

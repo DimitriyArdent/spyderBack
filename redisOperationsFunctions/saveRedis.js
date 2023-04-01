@@ -1,17 +1,21 @@
 
 
 
-function saveToRedis(targetWordOccurences, URL, currentDepth, client) {
+function saveToRedis(targetWordOccurences, URL, currentDepth, client, links) {
     console.log(targetWordOccurences + '  ' + URL + '  ' + currentDepth)
-    targetWordOccurences = Array.from(targetWordOccurences)
+    if (targetWordOccurences != undefined) {
+        targetWordOccurences = Array.from(targetWordOccurences)
 
-    client.HSET(URL, ["phrases", JSON.stringify(targetWordOccurences), "Depth", currentDepth], (err, reply) => {
-        if (err) {
-            console.error(err);
-        } else {
-            console.log(reply);
-        }
-    });
+
+        client.HSET(URL, ["phrases", JSON.stringify(targetWordOccurences), "Depth", currentDepth, "linksInThisUrl", JSON.stringify(links)], (err, reply) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log(reply);
+            }
+        });
+    }
+
 
 
 
