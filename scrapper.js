@@ -10,12 +10,7 @@ const AWS = require('aws-sdk');
 //https://sqs.us-east-1.amazonaws.com/317034001266/WebScrappweSQS
 app.use(cors())
 
-const sqs = new AWS.SQS({
-    region: 'us-east-1',
-    accessKeyId: 'AKIARUXX3267DADIAWXC',
-    secretAccessKey: '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'
-});
-
+ 
 
 
 
