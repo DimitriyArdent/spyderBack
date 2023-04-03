@@ -58,13 +58,7 @@ io.on('connection', (socket) => {
 
 
 
-const sqs = new AWS.SQS({
-    region: 'us-east-1',
-    accessKeyId: 'AKIARUXX3267DADIAWXC',
-    secretAccessKey: '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'
-});
-
-
+ 
 app.get('/activateSearch', (req, res) => {
 
 
