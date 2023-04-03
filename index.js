@@ -2,38 +2,69 @@ const PORT = 8001
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const Redis = require('ioredis');
+const redis = new Redis(6379, "127.0.0.1");
+const redis2 = new Redis(6379, "127.0.0.1");
+
+const publisher = new Redis();
+
 const AWS = require('aws-sdk');
 //const redis = require('redis');
 app.use(cors())
 
-
+///////////
+//socket///
+//////////
 const socketIo = require('socket.io')
 const http = require('http')
 const server = http.createServer(app)
-
 const io = socketIo(server, {
     cors: {
         origin: 'http://localhost:3000'
     }
-}) //in case server and client run on different urls
+})
 
 
 
 
 
-const Redis = require('ioredis');
 
-const redis = new Redis(6379, "127.0.0.1");
 
-redis.psubscribe("messages", (err, count) => {
-    //
+
+
+
+
+redis.psubscribe('__keyspace@0__:*', (err, count) => {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log(`Subscribed to ${count} channels`);
+    }
 });
 
-redis.on("pmessage", (pattern, channel, message) => {
+redis.on('pmessage', (pattern, channel, message) => {
 
-    console.log(message);
-    // io.emit("news-action:" + message.event, message.data);
+    if (pattern === '__keyspace@0__:*') {
+        const command = message.split(' ')[0];
+        const key = channel.split(':')[1];
+        if (command === 'set') {
+            redis2.get(key, (err, value) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    io.to('clock-room').emit(`Key ${key} has been modified. New value is: ${value}`);
+                }
+            });
+        }
+    }
 });
+
+
+
+
+
+
+
 
 
 
@@ -45,22 +76,34 @@ redis.on("pmessage", (pattern, channel, message) => {
 
 io.on('connection', (socket) => {
 
-    socket.emit('message', 'hello from server')
 
-    console.log('yes')
+    redis.on("pmessage", (pattern, channel, message) => {
 
+
+        if (pattern === '__keyspace@0__:*') {
+            const command = message.split(' ')[0];
+            const key = channel.split(':')[1];
+            if (command === 'set') {
+                redis2.get(key, (err, value) => {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        socket.emit('message', `Key ${key} has been modified. New value is: ${value}`)
+
+                    }
+                });
+            }
+        }
+    });
     socket.join('clock - room')
-
-    socket.on('disconnect', (reason) => {
-    })
 })
 
 
 
 
- 
-app.get('/activateSearch', (req, res) => {
 
+
+app.get('/activateSearch', (req, res) => {
 
     const params = {
         MessageBody: JSON.stringify(req.query), // Replace with your message body
@@ -86,5 +129,6 @@ app.get('/activateSearch', (req, res) => {
 
 
 
-
 server.listen(PORT, () => console.log(`server running on PORT ${PORT}`))
+
+
