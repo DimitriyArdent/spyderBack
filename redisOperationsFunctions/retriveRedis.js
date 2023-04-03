@@ -17,14 +17,7 @@ async function connectToRedis(client) {
 }
 connectToRedis(client)
 
-// connect to SQS
-const sqs = new AWS.SQS({
-    region: 'us-east-1',
-    accessKeyId: 'AKIARUXX3267DADIAWXC',
-    secretAccessKey: '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'
-});
-
-
+ 
 
 let depth0Flag = true
 
