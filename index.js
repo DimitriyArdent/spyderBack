@@ -33,7 +33,6 @@ const io = socketIo(server, {
 
 
 
-
 redis.psubscribe('__keyspace@0__:*', (err, count) => {
     if (err) {
         console.error(err);
@@ -42,33 +41,6 @@ redis.psubscribe('__keyspace@0__:*', (err, count) => {
     }
 });
 
-redis.on('pmessage', (pattern, channel, message) => {
-
-    if (pattern === '__keyspace@0__:*') {
-        const command = message.split(' ')[0];
-        const key = channel.split(':')[1];
-        if (command === 'set') {
-            redis2.get(key, (err, value) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    io.to('clock-room').emit(`Key ${key} has been modified. New value is: ${value}`);
-                }
-            });
-        }
-    }
-});
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -76,19 +48,26 @@ redis.on('pmessage', (pattern, channel, message) => {
 
 io.on('connection', (socket) => {
 
-
     redis.on("pmessage", (pattern, channel, message) => {
 
 
         if (pattern === '__keyspace@0__:*') {
+
+
             const command = message.split(' ')[0];
-            const key = channel.split(':')[1];
-            if (command === 'set') {
-                redis2.get(key, (err, value) => {
+            const keyStart = channel.split(':')[1];
+            const keyEnd = channel.split(':')[2];
+            const finalKey = keyStart + ':' + keyEnd
+
+
+
+
+            if (command === 'hset') {
+                redis2.hgetall(finalKey, (err, value) => {
                     if (err) {
                         console.error(err);
                     } else {
-                        socket.emit('message', `Key ${key} has been modified. New value is: ${value}`)
+                        socket.emit('message', JSON.stringify({ selfKey: finalKey, value: value }))
 
                     }
                 });
@@ -102,6 +81,11 @@ io.on('connection', (socket) => {
 
 
 
+const sqs = new AWS.SQS({
+    region: 'us-east-1',
+    accessKeyId: 'AKIARUXX3267DADIAWXC',
+    secretAccessKey: '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'
+});
 
 app.get('/activateSearch', (req, res) => {
 
