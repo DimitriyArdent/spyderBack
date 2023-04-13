@@ -7,20 +7,14 @@ const { pollMessages } = require('./scrapperServerFunctions/poll')
 const { metaSearch } = require('./scrapperServerFunctions/search')
 
 const AWS = require('aws-sdk');
-//https://sqs.us-east-1.amazonaws.com/317034001266/WebScrappweSQS
 app.use(cors())
 
  
 
 
 
-
-let count = 1
-
-
 const intervalId = setInterval(async () => {
     let response = await pollMessages(sqs); // activating FUNCTION pollMessages(sqs) to poll messages from SQS
-    console.log('scrapper running recursively' + (count += 1))
     /// if there is a message///
     if (response.Messages && response.Messages.length > 0 && response.Messages[0].Body) {
 
@@ -42,7 +36,7 @@ const intervalId = setInterval(async () => {
             ReceiptHandle: response.Messages[0].ReceiptHandle
         };
         var removedMessage = await sqs.deleteMessage(deleteParams).promise();
-        clearInterval(intervalId)
+        //clearInterval(intervalId)
     }
 
 
