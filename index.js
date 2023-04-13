@@ -6,7 +6,6 @@ const Redis = require('ioredis');
 const redis = new Redis(6379, "127.0.0.1");
 const redis2 = new Redis(6379, "127.0.0.1");
 
-const publisher = new Redis();
 
 const AWS = require('aws-sdk');
 //const redis = require('redis');
@@ -27,12 +26,6 @@ const io = socketIo(server, {
 
 
 
-
-
-
-
-
-
 redis.psubscribe('__keyspace@0__:*', (err, count) => {
     if (err) {
         console.error(err);
@@ -42,14 +35,9 @@ redis.psubscribe('__keyspace@0__:*', (err, count) => {
 });
 
 
-
-
-
-
 io.on('connection', (socket) => {
 
     redis.on("pmessage", (pattern, channel, message) => {
-
 
         if (pattern === '__keyspace@0__:*') {
 
@@ -58,16 +46,13 @@ io.on('connection', (socket) => {
             const keyStart = channel.split(':')[1];
             const keyEnd = channel.split(':')[2];
             const finalKey = keyStart + ':' + keyEnd
-
-
-
-
             if (command === 'hset') {
                 redis2.hgetall(finalKey, (err, value) => {
                     if (err) {
                         console.error(err);
                     } else {
                         socket.emit('message', JSON.stringify({ selfKey: finalKey, value: value }))
+                        console.log('message emitted from server')
 
                     }
                 });
@@ -79,10 +64,11 @@ io.on('connection', (socket) => {
 
 
 
-
+///////////
+//AWS//////
+//////////
 
  
-
 app.get('/activateSearch', (req, res) => {
 
     const params = {
